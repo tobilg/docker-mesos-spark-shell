@@ -1,6 +1,6 @@
 # Mesos Spark Shell
 
-A docker image for creating a Spark shell on a Mesos cluster
+A docker image for creating a Spark shell on a Mesos cluster. Currently, Mesos 0.20.1 is supported.
 
 ### Running
 
