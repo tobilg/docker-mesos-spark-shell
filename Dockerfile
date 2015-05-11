@@ -4,14 +4,17 @@ MAINTAINER tobilg <fb.tools.github@gmail.com>
 RUN apt-get update && apt-get install  -yq --no-install-recommends --force-yes \
     openjdk-7-jre-headless \
     wget \
-    libsasl2-dev
+    libsasl2-dev \
+    libapr1-dev \
+    libsvn-dev \
+    libcurl4-nss-dev
 
 ENV SPARK_VERSION=spark-1.3.1-bin-hadoop2.6
 ENV SPARK_FILE=$SPARK_VERSION.tgz
 ENV SPARK_DOWNLOAD_URL=http://d3kbcqa49mib13.cloudfront.net/$SPARK_FILE
 
 RUN wget $SPARK_DOWNLOAD_URL
-RUN wget https://www.dropbox.com/s/a38g10ykjh5v2p0/libmesos-0.20.1.so?dl=0
+RUN wget https://www.dropbox.com/s/3qg8udvhfyyylir/libmesos-0.22.1.tar.gz?dl=0
 
 RUN mkdir /usr/local/spark
 
@@ -25,8 +28,10 @@ ADD ./spark-defaults.conf $SPARK_HOME/conf/
 
 RUN sed -i 's|%SEU%|'$SPARK_EXECUTOR_URI'|g' $SPARK_HOME/conf/spark-defaults.conf
 
-RUN mv ./libmesos-0.20.1.so?dl=0 /usr/local/lib/libmesos-0.20.1.so
-ENV MESOS_NATIVE_JAVA_LIBRARY=/usr/local/lib/libmesos-0.20.1.so
+RUN mv ./libmesos-0.22.1.tar.gz?dl=0 ./libmesos-0.22.1.tar.gz
+RUN tar xzf ./libmesos-0.22.1.tar.gz
+RUN mv ./libmesos-0.22.1.so /usr/local/lib/libmesos-0.22.1.so
+ENV MESOS_NATIVE_JAVA_LIBRARY=/usr/local/lib/libmesos-0.22.1.so
 
 CMD "/usr/local/bin/bootstrap.sh"
 
