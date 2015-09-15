@@ -1,4 +1,4 @@
-FROM ubuntu:14.04.2
+FROM ubuntu:14.04.3
 MAINTAINER tobilg <fb.tools.github@gmail.com>
 
 RUN apt-get update && apt-get install  -yq --no-install-recommends --force-yes \
@@ -9,18 +9,28 @@ RUN apt-get update && apt-get install  -yq --no-install-recommends --force-yes \
     libsvn-dev \
     libcurl4-nss-dev
 
-ENV SPARK_VERSION=spark-1.3.1-bin-hadoop2.6
-ENV SPARK_FILE=$SPARK_VERSION.tgz
-ENV SPARK_DOWNLOAD_URL=http://d3kbcqa49mib13.cloudfront.net/$SPARK_FILE
+# Mesos ENV vars
+ENV MESOS_BUILD_VERSION 0.23.0
 
-RUN wget $SPARK_DOWNLOAD_URL
-RUN wget https://www.dropbox.com/s/3qg8udvhfyyylir/libmesos-0.22.1.tar.gz?dl=0
+# Mesos install
+RUN wget http://downloads.mesosphere.io/master/ubuntu/14.04/mesos_$MESOS_BUILD_VERSION-1.0.ubuntu1404_amd64.deb && \
+    dpkg -i mesos_$MESOS_BUILD_VERSION-1.0.ubuntu1404_amd64.deb && \
+    rm mesos_$MESOS_BUILD_VERSION-1.0.ubuntu1404_amd64.deb
 
-RUN mkdir /usr/local/spark
+# Spark ENV vars
+ENV SPARK_VERSION 1.4.1
+ENV SPARK_HOME /usr/local/spark
+ENV SPARK_VERSION_STRING spark-$SPARK_VERSION-bin-hadoop2.6
+ENV SPARK_DOWNLOAD_URL http://d3kbcqa49mib13.cloudfront.net/$SPARK_VERSION_STRING.tgz
 
-RUN tar xvf $SPARK_FILE -C /usr/local/spark
+# Install Spark
+RUN wget $SPARK_DOWNLOAD_URL && \
+    mkdir -p $SPARK_HOME && \
+    tar xvf $SPARK_VERSION_STRING.tgz -C /tmp && \
+    cp -rf /tmp/$SPARK_VERSION_STRING/* $SPARK_HOME/ && \
+    rm -rf -- /tmp/$SPARK_VERSION_STRING && \
+    rm spark-$SPARK_VERSION-bin-hadoop2.6.tgz
 
-ENV SPARK_HOME=/usr/local/spark/$SPARK_VERSION
 ENV PATH=$SPARK_HOME/bin:$PATH
 
 ADD ./bootstrap.sh /usr/local/bin/
@@ -28,10 +38,7 @@ ADD ./spark-defaults.conf $SPARK_HOME/conf/
 
 RUN sed -i 's|%SEU%|'$SPARK_EXECUTOR_URI'|g' $SPARK_HOME/conf/spark-defaults.conf
 
-RUN mv ./libmesos-0.22.1.tar.gz?dl=0 ./libmesos-0.22.1.tar.gz
-RUN tar xzf ./libmesos-0.22.1.tar.gz
-RUN mv ./libmesos-0.22.1.so /usr/local/lib/libmesos-0.22.1.so
-ENV MESOS_NATIVE_JAVA_LIBRARY=/usr/local/lib/libmesos-0.22.1.so
+ENV MESOS_NATIVE_JAVA_LIBRARY=/usr/local/lib/libmesos-$MESOS_BUILD_VERSION.so
 
 CMD "/usr/local/bin/bootstrap.sh"
 

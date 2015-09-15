@@ -1,6 +1,6 @@
 # Mesos Spark Shell
 
-A docker image for creating a Spark shell on a Mesos cluster. Currently, Mesos 0.22.1-rc6 is supported on `master`. The `libmesos.so` was compiled with the [tobilg/docker-mesos](https://github.com/tobilg/docker-mesos) image, extracted and uploaded to Dropbox for being used in the Dockerfile.
+A docker image for creating a Spark 1.4.1 shell on a Mesos cluster. Currently, Mesos 0.23.0 is supported via `.deb` installer.
 
 ### Running
 
@@ -14,7 +14,7 @@ docker run -i -t \
     --net=host \
     -e MESOS_MASTER=127.0.0.1:5050 \
     -e SPARK_LOCAL_IP=127.0.0.1 \
-    -e SPARK_EXECUTOR_URI=http://d3kbcqa49mib13.cloudfront.net/spark-1.3.1-bin-hadoop2.6.tgz \
+    -e SPARK_EXECUTOR_URI=http://d3kbcqa49mib13.cloudfront.net/spark-1.4.1-bin-hadoop2.6.tgz \
     -p 4040:4040 \
     -p 5000:5000 \
     -p 5001:5001 \
